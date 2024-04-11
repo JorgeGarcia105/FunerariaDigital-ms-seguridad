@@ -76,6 +76,18 @@ export class Usuario extends Entity {
   })
   sede?: string;
 
+  // Datos adicionales para usuarios publicos - Verificacion y aceptacion de un registro
+  @property({
+    type: 'boolean',
+    required: true,
+  })
+  estadoValidacion?: boolean;
+
+  @property({
+    type: 'boolean',
+  })
+  aceptado?: boolean;
+
   @hasMany(() => Login)
   logins: Login[];
 

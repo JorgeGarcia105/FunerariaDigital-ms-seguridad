@@ -5,12 +5,12 @@ import {ConfiguracionSeguridad} from '../config/seguridad.config';
 const config = {
   name: 'mongodb',
   connector: 'mongodb',
-  url: '',
+  url: ConfiguracionSeguridad.mongodbConnetionString,
   host: 'localhost',
   port: 27017,
-  user: ConfiguracionSeguridad.usuariomongo,
-  password: ConfiguracionSeguridad.claveJWT,
-  database: 'FunerariaDigital',
+  user: '',
+  password: '',
+  database: 'funeraria_digital',
   useNewUrlParser: true
 };
 
