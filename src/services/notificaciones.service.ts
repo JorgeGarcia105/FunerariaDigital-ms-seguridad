@@ -5,8 +5,10 @@ const fetch = require('node-fetch');
 export class NotificacionesService {
   constructor(/* Add @inject to inject parameters */) { }
 
-  /*
-   * Add service methods here
+  /**
+   *
+   * @param datos
+   * @param url
    */
   EnviarNotificacion(datos: any, url: string) {
     fetch(url, {

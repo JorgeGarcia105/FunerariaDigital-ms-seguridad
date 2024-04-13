@@ -21,7 +21,7 @@ export class Usuario extends Entity {
     type: 'string',
     required: true,
   })
-  segundoNombre: string;
+  segundoNombre?: string;
 
   @property({
     type: 'string',
@@ -83,6 +83,11 @@ export class Usuario extends Entity {
   responsabilidades?: string;
 
   // Datos adicionales para usuarios publicos - Verificacion y aceptacion de un registro
+  @property({
+    type: 'string',
+  })
+  hashValidacion?: string;
+
   @property({
     type: 'boolean',
     required: true,

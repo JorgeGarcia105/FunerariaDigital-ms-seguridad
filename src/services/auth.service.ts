@@ -11,6 +11,13 @@ export class AuthService {
     private repositorioRolMenu: RolMenuRepository
   ) { }
 
+  /**
+   *
+   * @param idRol
+   * @param idMenu
+   * @param accion
+   * @returns
+   */
   async VerificarPermisoDeUsuarioPorRol(idRol: string, idMenu: string, accion: string): Promise<UserProfile | undefined> {
     let permiso = await this.repositorioRolMenu.findOne({
       where: {
