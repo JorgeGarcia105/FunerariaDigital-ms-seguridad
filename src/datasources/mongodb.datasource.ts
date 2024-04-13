@@ -5,7 +5,7 @@ import {ConfiguracionSeguridad} from '../config/seguridad.config';
 const config = {
   name: 'mongodb',
   connector: 'mongodb',
-  url: ConfiguracionSeguridad.mongodbConnetionString,
+  url: ConfiguracionSeguridad.mongodbConnectionString,
   host: 'localhost',
   port: 27017,
   user: '',

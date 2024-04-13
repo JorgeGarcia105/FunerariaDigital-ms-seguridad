@@ -1,4 +1,4 @@
-import {Entity, model, property, hasMany, belongsTo} from '@loopback/repository';
+import {belongsTo, Entity, hasMany, model, property} from '@loopback/repository';
 import {Login} from './login.model';
 import {Rol} from './rol.model';
 
@@ -76,6 +76,12 @@ export class Usuario extends Entity {
   })
   sede?: string;
 
+  @property({
+    type: 'string',
+    required: true,
+  })
+  responsabilidades?: string;
+
   // Datos adicionales para usuarios publicos - Verificacion y aceptacion de un registro
   @property({
     type: 'boolean',
@@ -93,11 +99,6 @@ export class Usuario extends Entity {
 
   @belongsTo(() => Rol)
   rolId: string;
-  @property({
-    type: 'string',
-    required: true,
-  })
-  responsabilidades?: string;
 
   constructor(data?: Partial<Usuario>) {
     super(data);
