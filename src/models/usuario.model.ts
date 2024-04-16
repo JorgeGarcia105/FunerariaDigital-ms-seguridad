@@ -74,12 +74,6 @@ export class Usuario extends Entity {
     type: 'string',
     required: true,
   })
-  sede?: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
   responsabilidades?: string;
 
   // Datos adicionales para usuarios publicos - Verificacion y aceptacion de un registro

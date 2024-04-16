@@ -287,6 +287,7 @@ export class UsuarioController {
       let codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
       console.log("su codigo es" + codigo2fa);
       let login: Login = new Login();
+      console.log("login" + login);
       login.usuarioId = usuario._id!;
       login.codigo2fa = codigo2fa;
       login.estadoCodigo2fa = false;
@@ -303,6 +304,9 @@ export class UsuarioController {
       };
       let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
       this.servicioNotificaciones.EnviarNotificacion(datos, url);
+      console.log("datos" + datos.correoDestino + " " + datos.nombreDestino + " " + datos.contenidoCorreo + " " + datos.asuntoCorreo);
+      console.log("url" + url);
+      console.log("usuario" + usuario.correo + " " + usuario.primerNombre);
       return usuario;
     }
     return new HttpErrors[401]("Credenciales incorrectas.");
@@ -344,12 +348,11 @@ export class UsuarioController {
       };
       let url = ConfiguracionNotificaciones.urlNotificacionesSms;
       this.servicioNotificaciones.EnviarNotificacion(datos, url);
+      console.log("datos" + datos.numeroDestino + " " + datos.contenidoMensaje);
       return usuario;
     }
     return new HttpErrors[401]("Credenciales incorrectas.");
   }
-
-
 
   @post('/validar-permisos')
   @response(200, {
