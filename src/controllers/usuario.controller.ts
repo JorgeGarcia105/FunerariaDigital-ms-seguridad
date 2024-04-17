@@ -16,7 +16,7 @@ import {
 import {UserProfile} from '@loopback/security';
 import {ConfiguracionNotificaciones} from '../config/notificaciones.config';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
-import {Credenciales, CredencialesRecuperarClave, FactorDeAutentificacionPorCodigo, HashValidacionUsuario, Login, PermisosRolMenu, Usuario} from '../models';
+import {Credenciales, CredencialesCambioClave, CredencialesRecuperarClave, FactorDeAutentificacionPorCodigo, HashValidacionUsuario, Login, PermisosRolMenu, Usuario} from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
 import {AuthService, NotificacionesService, SeguridadUsuarioService} from '../services';
 
@@ -350,6 +350,62 @@ export class UsuarioController {
       this.servicioNotificaciones.EnviarNotificacion(datos, url);
       console.log("datos" + datos.numeroDestino + " " + datos.contenidoMensaje);
       return usuario;
+    }
+    return new HttpErrors[401]("Credenciales incorrectas.");
+  }
+
+  // Cambio de clave por medio de código 2fa
+  @post('/cambio-clave')
+  @response(200, {
+    description: "Actualizacion de clave por código 2fa",
+    content: {'application/json': {schema: getModelSchemaRef(Usuario)}}
+  })
+  async CambioClaveUsuario(
+    @requestBody(
+      {
+        content: {
+          'application/json': {
+            schema: getModelSchemaRef(CredencialesCambioClave)
+          }
+        }
+      }
+    )
+    credenciales: CredencialesCambioClave
+  ): Promise<object> {
+    let usuario = await this.servicioSeguridad.identificarUsuario(credenciales);
+    if (usuario) {
+      let login = await this.respositorioLogin.findOne({
+        where: {
+          usuarioId: usuario._id,
+          codigo2fa: credenciales.codigo2fa,
+          estadoCodigo2fa: false,
+        }
+      });
+      if (login) {
+        let claveCifrada = this.servicioSeguridad.cifrarTexto(credenciales.nuevaClave);
+        let codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
+        // notificar al usuario vía correo o sms para confirmar el cambio de clave
+        let datos = {
+          correoDestino: usuario.correo,
+          nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
+          contenidoCorreo: `Por favor ingrese este código para confirmar el cambio de clave: ${codigo2fa}`,
+          asuntoCorreo: ConfiguracionNotificaciones.asunto2fa,
+        };
+        let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
+        this.servicioNotificaciones.EnviarNotificacion(datos, url);
+
+        if (credenciales.codigo2fa == codigo2fa && credenciales.estadoCodigo2fa == false) {
+          if (usuario.clave != credenciales.nuevaClave) {
+            usuario.clave = claveCifrada;
+            this.usuarioRepository.updateById(usuario._id, usuario);
+            return usuario;
+          } else {
+            return new HttpErrors[401]("La clave nueva no puede ser igual a la anterior.");
+          }
+        } else {
+          return new HttpErrors[401]("Código 2FA incorrecto o ya utilizado.");
+        }
+      }
     }
     return new HttpErrors[401]("Credenciales incorrectas.");
   }
