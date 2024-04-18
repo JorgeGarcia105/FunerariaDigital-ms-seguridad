@@ -377,14 +377,13 @@ export class UsuarioController {
       let login = await this.respositorioLogin.findOne({
         where: {
           usuarioId: usuario._id,
-          codigo2fa: credenciales.codigo2fa,
-          estadoCodigo2fa: false,
         }
       });
       if (login) {
         let claveCifrada = this.servicioSeguridad.cifrarTexto(credenciales.nuevaClave);
         let codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
         // notificar al usuario vía correo o sms para confirmar el cambio de clave
+        console.log("codigo2fa" + codigo2fa);
         let datos = {
           correoDestino: usuario.correo,
           nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
