@@ -20,7 +20,6 @@ export class PermisosRolMenu extends Model {
   })
   accion: string;
 
-
   constructor(data?: Partial<PermisosRolMenu>) {
     super(data);
   }

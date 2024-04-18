@@ -351,10 +351,10 @@ export class UsuarioController {
     return new HttpErrors[401]("Credenciales incorrectas.");
   }
 
-  // Cambio de clave por medio de código 2fa
+  // Cambio de clave por confirmacion via correo
   @post('/cambio-clave')
   @response(200, {
-    description: "Actualizacion de clave por código 2fa",
+    description: "Actualizacion de clave por confirmacion de correo",
     content: {'application/json': {schema: getModelSchemaRef(Usuario)}}
   })
   async CambioClaveUsuario(
