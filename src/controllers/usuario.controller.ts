@@ -34,10 +34,7 @@ export class UsuarioController {
     public servicioNotificaciones: NotificacionesService
   ) { }
 
-  @authenticate({
-    strategy: "auth",
-    options: ["Usuario", "guardar"]
-  })
+
   @post('/usuario')
   @response(200, {
     description: 'Usuario model instance',
@@ -377,6 +374,8 @@ export class UsuarioController {
       let login = await this.respositorioLogin.findOne({
         where: {
           usuarioId: usuario._id,
+          codigo2fa: credenciales.codigo2faConfirmacion,
+          estadoCodigo2fa: false,
         }
       });
       if (login) {
@@ -393,10 +392,11 @@ export class UsuarioController {
         let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
         this.servicioNotificaciones.EnviarNotificacion(datos, url);
 
-        if (credenciales.codigo2fa == codigo2fa && credenciales.estadoCodigo2fa == false) {
+        if (credenciales.codigo2faConfirmacion == codigo2fa && credenciales.estadoCodigo2fa == false) {
           if (usuario.clave != credenciales.nuevaClave) {
             usuario.clave = claveCifrada;
             this.usuarioRepository.updateById(usuario._id, usuario);
+            credenciales.estadoCodigo2fa = true
             return usuario;
           } else {
             return new HttpErrors[401]("La clave nueva no puede ser igual a la anterior.");

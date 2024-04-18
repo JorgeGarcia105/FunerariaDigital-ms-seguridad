@@ -18,7 +18,7 @@ export class CredencialesCambioClave extends Model {
     type: 'string',
     required: true,
   })
-  codigo2fa: string;
+  codigo2faConfirmacion: string;
 
   @property({
     type: 'string',
