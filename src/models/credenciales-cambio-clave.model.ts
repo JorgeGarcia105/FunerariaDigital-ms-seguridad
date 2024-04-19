@@ -18,19 +18,7 @@ export class CredencialesCambioClave extends Model {
     type: 'string',
     required: true,
   })
-  codigo2faConfirmacion: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
   nuevaClave: string;
-
-  @property({
-    type: 'boolean',
-    required: true,
-  })
-  estadoCodigo2fa: boolean;
 
   constructor(data?: Partial<CredencialesCambioClave>) {
     super(data);

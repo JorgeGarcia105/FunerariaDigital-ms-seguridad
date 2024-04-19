@@ -119,24 +119,4 @@ export class SeguridadUsuarioService {
     );
     return menu;
   }
-
-  /**
-   * Cambio de clave de un usuario
-   * @param credencialesCambioClave credenciales del usuario con la nueva clave
-   * @returns true si se cambió la clave, false en caso contrario
-   */
-  /*async cambiarClave(credencialesCambioClave: Credenciales): Promise<boolean> {
-    let usuario = await this.repositorioUsuario.findOne({
-      where: {
-        correo: credencialesCambioClave.correo,
-        clave: credencialesCambioClave.clave
-      }
-    });
-    if (usuario) {
-      usuario.clave = credencialesCambioClave.nuevaClave;
-      await this.repositorioUsuario.update(usuario);
-      return true;
-    }
-    return false;
-  }*/
 }

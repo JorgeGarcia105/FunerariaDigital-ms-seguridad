@@ -35,6 +35,10 @@ export class UsuarioController {
   ) { }
 
 
+  @authenticate({
+    strategy: "auth",
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+  })
   @post('/usuario')
   @response(200, {
     description: 'Usuario model instance',
@@ -63,93 +67,6 @@ export class UsuarioController {
     usuario.estadoValidacion = true;
     // enviar correo electrónico de notificación
     return this.usuarioRepository.create(usuario);
-  }
-
-
-  @post('/usuario-publico')
-  @response(200, {
-    description: 'Usuario model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Usuario)}},
-  })
-  async creacionPublica(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Usuario, {
-            title: 'NewUsuario',
-            exclude: ['_id'],
-          }),
-        },
-      },
-    })
-    usuario: Omit<Usuario, '_id'>,
-  ): Promise<Usuario> {
-    // crear la clave
-    let clave = this.servicioSeguridad.crearTextoAleatorio(10);
-    console.log(clave);
-    // cifrar la clave
-    let claveCifrada = this.servicioSeguridad.cifrarTexto(clave);
-    // asignar la clave cifrada al usuario
-    usuario.clave = claveCifrada;
-    // hash de validación de correo
-    let hash = this.servicioSeguridad.crearTextoAleatorio(100);
-    usuario.hashValidacion = hash;
-    usuario.estadoValidacion = false;
-    usuario.aceptado = false;
-    usuario.rolId = ConfiguracionSeguridad.rolUsuarioPublico;
-
-
-    // Notificación del hash
-    let enlace = `<a href="${ConfiguracionNotificaciones.urlValidacionCorreoFrontend}/${hash}" target='_blank'>Validar</a>`;
-    let datos = {
-      correoDestino: usuario.correo,
-      nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-      contenidoCorreo: `Por favor visite este link para validar su correo: ${enlace}`,
-      asuntoCorreo: ConfiguracionNotificaciones.asuntoVerificacionCorreo,
-    };
-    let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
-    this.servicioNotificaciones.EnviarNotificacion(datos, url);
-
-    // Envío de clave
-    let datosCorreo = {
-      correoDestino: usuario.correo,
-      nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-      contenidoCorreo: `Su clave asignada es: ${clave}`,
-      asuntoCorreo: ConfiguracionNotificaciones.claveAsignada,
-    };
-    this.servicioNotificaciones.EnviarNotificacion(datosCorreo, url);
-    // enviar correo electrónico de notificación
-    return this.usuarioRepository.create(usuario);
-
-  }
-
-
-  @post('/validar-hash-usuario')
-  @response(200, {
-    description: 'Validar hash',
-  })
-  async ValidarHashUsuario(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(HashValidacionUsuario, {}),
-        },
-      },
-    })
-    hash: HashValidacionUsuario,
-  ): Promise<boolean> {
-    let usuario = await this.usuarioRepository.findOne({
-      where: {
-        hashValidacion: hash.codigoHash,
-        estadoValidacion: false
-      }
-    });
-    if (usuario) {
-      usuario.estadoValidacion = true;
-      this.usuarioRepository.replaceById(usuario._id, usuario);
-      return true;
-    }
-    return false;
   }
 
   @get('/usuario/count')
@@ -204,6 +121,10 @@ export class UsuarioController {
     return this.usuarioRepository.updateAll(usuario, where);
   }
 
+  @authenticate({
+    strategy: "auth",
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+  })
   @get('/usuario/{id}')
   @response(200, {
     description: 'Usuario model instance',
@@ -238,6 +159,10 @@ export class UsuarioController {
     await this.usuarioRepository.updateById(id, usuario);
   }
 
+  @authenticate({
+    strategy: "auth",
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+  })
   @put('/usuario/{id}')
   @response(204, {
     description: 'Usuario PUT success',
@@ -249,6 +174,10 @@ export class UsuarioController {
     await this.usuarioRepository.replaceById(id, usuario);
   }
 
+  @authenticate({
+    strategy: "auth",
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+  })
   @del('/usuario/{id}')
   @response(204, {
     description: 'Usuario DELETE success',
@@ -279,7 +208,6 @@ export class UsuarioController {
     credenciales: Credenciales
   ): Promise<object> {
     let usuario = await this.servicioSeguridad.identificarUsuario(credenciales);
-    console.log(usuario + "usuario");
     if (usuario) {
       let codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
       console.log("su codigo es" + codigo2fa);
@@ -351,6 +279,10 @@ export class UsuarioController {
     return new HttpErrors[401]("Credenciales incorrectas.");
   }
 
+  @authenticate({
+    strategy: "auth",
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+  })
   // Cambio de clave por confirmacion via correo
   @post('/cambio-clave')
   @response(200, {
@@ -373,36 +305,25 @@ export class UsuarioController {
     if (usuario) {
       let login = await this.respositorioLogin.findOne({
         where: {
-          usuarioId: usuario._id,
-          codigo2fa: credenciales.codigo2faConfirmacion,
-          estadoCodigo2fa: false,
+          usuarioId: usuario._id
         }
       });
       if (login) {
         let claveCifrada = this.servicioSeguridad.cifrarTexto(credenciales.nuevaClave);
-        let codigo2fa = this.servicioSeguridad.crearTextoAleatorio(5);
-        // notificar al usuario vía correo o sms para confirmar el cambio de clave
-        console.log("codigo2fa" + codigo2fa);
         let datos = {
           correoDestino: usuario.correo,
           nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-          contenidoCorreo: `Por favor ingrese este código para confirmar el cambio de clave: ${codigo2fa}`,
+          contenidoCorreo: `El cambio de contraseña fue exitoso. Su nueva clave es: ${credenciales.nuevaClave}. Si usted no ejecuto esta accion por favor ingrese a arecuperar contraseña`,
           asuntoCorreo: ConfiguracionNotificaciones.asunto2fa,
         };
         let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
         this.servicioNotificaciones.EnviarNotificacion(datos, url);
-
-        if (credenciales.codigo2faConfirmacion == codigo2fa && credenciales.estadoCodigo2fa == false) {
-          if (usuario.clave != credenciales.nuevaClave) {
-            usuario.clave = claveCifrada;
-            this.usuarioRepository.updateById(usuario._id, usuario);
-            credenciales.estadoCodigo2fa = true
-            return usuario;
-          } else {
-            return new HttpErrors[401]("La clave nueva no puede ser igual a la anterior.");
-          }
+        if (usuario.clave != credenciales.nuevaClave) {
+          usuario.clave = claveCifrada;
+          this.usuarioRepository.updateById(usuario._id, usuario);
+          return usuario;
         } else {
-          return new HttpErrors[401]("Código 2FA incorrecto o ya utilizado.");
+          return new HttpErrors[401]("La clave nueva no puede ser igual a la anterior.");
         }
       }
     }
@@ -473,5 +394,90 @@ export class UsuarioController {
       }
     }
     return new HttpErrors[401]("Código de 2fa inválido para el usuario definido.");
+  }
+
+  @post('/usuario-publico')
+  @response(200, {
+    description: 'Usuario model instance',
+    content: {'application/json': {schema: getModelSchemaRef(Usuario)}},
+  })
+  async creacionPublica(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Usuario, {
+            title: 'NewUsuario',
+            exclude: ['_id'],
+          }),
+        },
+      },
+    })
+    usuario: Omit<Usuario, '_id'>,
+  ): Promise<Usuario> {
+    // crear la clave
+    let clave = this.servicioSeguridad.crearTextoAleatorio(10);
+    console.log(clave);
+    // cifrar la clave
+    let claveCifrada = this.servicioSeguridad.cifrarTexto(clave);
+    // asignar la clave cifrada al usuario
+    usuario.clave = claveCifrada;
+    // hash de validación de correo
+    let hash = this.servicioSeguridad.crearTextoAleatorio(100);
+    usuario.hashValidacion = hash;
+    usuario.estadoValidacion = false;
+    usuario.aceptado = false;
+    usuario.rolId = ConfiguracionSeguridad.rolUsuarioPublico;
+
+
+    // Notificación del hash
+    let enlace = `<a href="${ConfiguracionNotificaciones.urlValidacionCorreoFrontend}/${hash}" target='_blank'>Validar</a>`;
+    let datos = {
+      correoDestino: usuario.correo,
+      nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
+      contenidoCorreo: `Por favor visite este link para validar su correo: ${enlace}`,
+      asuntoCorreo: ConfiguracionNotificaciones.asuntoVerificacionCorreo,
+    };
+    let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
+    this.servicioNotificaciones.EnviarNotificacion(datos, url);
+
+    // Envío de clave
+    let datosCorreo = {
+      correoDestino: usuario.correo,
+      nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
+      contenidoCorreo: `Su clave asignada es: ${clave}`,
+      asuntoCorreo: ConfiguracionNotificaciones.claveAsignada,
+    };
+    this.servicioNotificaciones.EnviarNotificacion(datosCorreo, url);
+    // enviar correo electrónico de notificación
+    return this.usuarioRepository.create(usuario);
+
+  }
+
+  @post('/validar-hash-usuario')
+  @response(200, {
+    description: 'Validar hash',
+  })
+  async ValidarHashUsuario(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(HashValidacionUsuario, {}),
+        },
+      },
+    })
+    hash: HashValidacionUsuario,
+  ): Promise<boolean> {
+    let usuario = await this.usuarioRepository.findOne({
+      where: {
+        hashValidacion: hash.codigoHash,
+        estadoValidacion: false
+      }
+    });
+    if (usuario) {
+      usuario.estadoValidacion = true;
+      this.usuarioRepository.replaceById(usuario._id, usuario);
+      return true;
+    }
+    return false;
   }
 }
