@@ -224,14 +224,11 @@ export class UsuarioController {
       let datos = {
         correoDestino: usuario.correo,
         nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-        contenidoCorreo: `Su código de segundo factor de autenticación es: ${codigo2fa}`,
+        contenidoCorreo: codigo2fa,
         asuntoCorreo: ConfiguracionNotificaciones.asunto2fa,
       };
       let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
       this.servicioNotificaciones.EnviarNotificacion(datos, url);
-      console.log("datos" + datos.correoDestino + " " + datos.nombreDestino + " " + datos.contenidoCorreo + " " + datos.asuntoCorreo);
-      console.log("url" + url);
-      console.log("usuario" + usuario.correo + " " + usuario.primerNombre);
       return usuario;
     }
     return new HttpErrors[401]("Credenciales incorrectas.");
@@ -269,11 +266,11 @@ export class UsuarioController {
       // notificar al usuario vía sms
       let datos = {
         numeroDestino: usuario.celular,
-        contenidoMensaje: `Hola ${usuario.primerNombre}, su nueva clave es: ${nuevaClave}`,
+        nombreDestinatario: usuario.primerNombre + '' + usuario.segundoNombre,
+        contenidoMensaje: nuevaClave,
       };
       let url = ConfiguracionNotificaciones.urlNotificacionesSms;
       this.servicioNotificaciones.EnviarNotificacion(datos, url);
-      console.log("datos" + datos.numeroDestino + " " + datos.contenidoMensaje);
       return usuario;
     }
     return new HttpErrors[401]("Credenciales incorrectas.");
@@ -313,7 +310,7 @@ export class UsuarioController {
         let datos = {
           correoDestino: usuario.correo,
           nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-          contenidoCorreo: `El cambio de contraseña fue exitoso. Su nueva clave es: ${credenciales.nuevaClave}. Si usted no ejecuto esta accion por favor ingrese a arecuperar contraseña`,
+          contenidoCorreo: credenciales.nuevaClave,
           asuntoCorreo: ConfiguracionNotificaciones.asunto2fa,
         };
         let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
@@ -444,7 +441,7 @@ export class UsuarioController {
     let datosCorreo = {
       correoDestino: usuario.correo,
       nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-      contenidoCorreo: `Su clave asignada es: ${clave}`,
+      contenidoCorreo: clave,
       asuntoCorreo: ConfiguracionNotificaciones.claveAsignada,
     };
     this.servicioNotificaciones.EnviarNotificacion(datosCorreo, url);
