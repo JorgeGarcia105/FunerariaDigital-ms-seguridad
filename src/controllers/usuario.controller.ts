@@ -37,7 +37,7 @@ export class UsuarioController {
 
   @authenticate({
     strategy: "auth",
-    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.guardarAccion]
   })
   @post('/usuario')
   @response(200, {
@@ -161,7 +161,7 @@ export class UsuarioController {
 
   @authenticate({
     strategy: "auth",
-    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.editarAccion]
   })
   @put('/usuario/{id}')
   @response(204, {
@@ -176,7 +176,7 @@ export class UsuarioController {
 
   @authenticate({
     strategy: "auth",
-    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.eliminarAccion]
   })
   @del('/usuario/{id}')
   @response(204, {
@@ -281,7 +281,7 @@ export class UsuarioController {
 
   @authenticate({
     strategy: "auth",
-    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.listarAccion]
+    options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.editarAccion]
   })
   // Cambio de clave por confirmacion via correo
   @post('/cambio-clave')
@@ -318,7 +318,7 @@ export class UsuarioController {
         };
         let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
         this.servicioNotificaciones.EnviarNotificacion(datos, url);
-        if (usuario.clave != credenciales.nuevaClave) {
+        if (usuario.clave != claveCifrada) {
           usuario.clave = claveCifrada;
           this.usuarioRepository.updateById(usuario._id, usuario);
           return usuario;
@@ -450,7 +450,6 @@ export class UsuarioController {
     this.servicioNotificaciones.EnviarNotificacion(datosCorreo, url);
     // enviar correo electrónico de notificación
     return this.usuarioRepository.create(usuario);
-
   }
 
   @post('/validar-hash-usuario')
