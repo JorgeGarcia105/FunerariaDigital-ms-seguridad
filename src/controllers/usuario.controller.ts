@@ -224,7 +224,7 @@ export class UsuarioController {
       let datos = {
         correoDestino: usuario.correo,
         nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-        contenidoCorreo: codigo2fa,
+        contenidoCorreo: 'Su codigo de segundo factor de autenticacion es: ' + codigo2fa,
         asuntoCorreo: ConfiguracionNotificaciones.asunto2fa,
       };
       let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
