@@ -65,14 +65,12 @@ export class Usuario extends Entity {
 
   @property({
     type: 'string',
-    required: true,
   })
   clave: string;
 
   //Datos adicionales para el Administrador
   @property({
     type: 'string',
-    required: true,
   })
   responsabilidades?: string;
 
@@ -84,7 +82,6 @@ export class Usuario extends Entity {
 
   @property({
     type: 'boolean',
-    required: true,
   })
   estadoValidacion?: boolean;
 
