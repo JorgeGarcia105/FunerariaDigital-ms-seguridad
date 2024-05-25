@@ -10,4 +10,3 @@ export * from './menu.controller';
 export * from './rol.controller';
 export * from './login.controller';
 export * from './permisos.controller';
-export * from './generar-pqrs.controller';
