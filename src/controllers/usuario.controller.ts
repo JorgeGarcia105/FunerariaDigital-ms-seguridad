@@ -276,10 +276,10 @@ export class UsuarioController {
     return new HttpErrors[401]("Credenciales incorrectas.");
   }
 
-  @authenticate({
+/*   @authenticate({
     strategy: "auth",
     options: [ConfiguracionSeguridad.menuUsuarioId, ConfiguracionSeguridad.editarAccion]
-  })
+  }) */
   // Cambio de clave por confirmacion via correo
   @post('/cambio-clave')
   @response(200, {
@@ -298,7 +298,10 @@ export class UsuarioController {
     )
     credenciales: CredencialesCambioClave
   ): Promise<object> {
+    credenciales.clave = this.servicioSeguridad.cifrarTexto(credenciales.clave);
     let usuario = await this.servicioSeguridad.identificarUsuario(credenciales);
+    console.log(usuario);
+
     if (usuario) {
       let login = await this.respositorioLogin.findOne({
         where: {
@@ -310,8 +313,8 @@ export class UsuarioController {
         let datos = {
           correoDestino: usuario.correo,
           nombreDestino: usuario.primerNombre + " " + usuario.segundoNombre,
-          contenidoCorreo: credenciales.nuevaClave,
-          asuntoCorreo: ConfiguracionNotificaciones.asunto2fa,
+          contenidoCorreo: "Su contraseña se actualizó correctamente",
+          asuntoCorreo: ConfiguracionNotificaciones.claveAsignada,
         };
         let url = ConfiguracionNotificaciones.urlNotificaciones2fa;
         this.servicioNotificaciones.EnviarNotificacion(datos, url);
